@@ -121,7 +121,9 @@ function Intro({ onDone }) {
         return true; });
       ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
       if (parts.length>3200) parts.splice(0, parts.length-3200);
-      if (el>4.0) finish(); else raf = requestAnimationFrame(frame);
+      // フェード開始後もアニメを止めない → 花火が動いたまま画面へクロスフェード
+      if (el>3.6) finish();
+      raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
@@ -591,6 +593,15 @@ export default function App() {
 
         <div style={{fontSize:10.5,color:"#6e7ea8",marginTop:14,lineHeight:1.7}}>
           ※ 2026年7月時点の公開情報をもとに作成。チケット状況は登録した受付期間から自動判定していますが、完売・変更の可能性があるため必ず公式サイトでご確認ください。
+        </div>
+        <div style={{textAlign:"center",margin:"22px 0 6px",display:"flex",
+          flexDirection:"column",alignItems:"center",gap:6}}>
+          <span style={{width:26,height:1,background:"linear-gradient(90deg,transparent,#3d4f7d,transparent)"}}/>
+          <a href="https://lifeshift-group.com" target="_blank" rel="noopener noreferrer"
+            style={{fontSize:11,letterSpacing:3,color:"#8a97bd",textDecoration:"none"}}>
+            <span style={{color:"#6e7ea8"}}>presented by</span>{" "}
+            <span style={{color:"#ffb347",fontWeight:700}}>Life Shift</span>
+          </a>
         </div>
       </div>
     </div>
