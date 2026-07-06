@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: "/tokai-hanabi-map/",
+  // カスタムドメイン(tokai-hanabi.lifeshift-group.com)直下で配信するため base は "/"
+  base: "/",
   server: { port: 5175 },
 });
