@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tokai-hanabi-map",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/mizutokikoya/Claude Code/tokai-hanabi-map",
+      "port": 5175
+    }
+  ]
+}
