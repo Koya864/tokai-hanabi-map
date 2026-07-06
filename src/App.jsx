@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { TOKAI_PATHS, TOKAI_BBOX, OTHER_LAND } from "./mapData.js";
 
 // ═════════════════════════════════════════════════════════════
 // ■ データの追加方法（プログラムを触ったことがなくてもOK）
@@ -38,9 +39,9 @@ const FESTIVALS = [
     lat:34.78, lon:137.39, place:"豊橋市 豊川河畔・吉田神社",
     venue:"river", venueLabel:"豊川の河畔", maxLabel:"手筒花火＋尺玉", maxDiaM:300,
     access:"名古屋から:名鉄特急で約50分",
-    tickets:[{label:"有料席", type:"sale", start:null, end:null}],
-    ticketNote:"開催間近のため完売の可能性あり。公式で残席確認を",
-    url:"https://hanabi.walkerplus.com/list/ar0600/",
+    tickets:[], statusOverride:{kind:"soldout", label:"完売"},
+    ticketNote:"桟敷席（6,000円）は完売（公式発表）。入手はチケット流通センター等の二次流通のみ",
+    url:"https://www.toyohashigion.org/",
     note:"手筒花火発祥の地。初日は境内で手筒、2日目に河畔で打上。" },
   { id:"minato", name:"海の日名古屋みなと祭花火大会", pref:"愛知",
     date:"2026-07-20", dateLabel:"7/20(月・祝 海の日)", verified:true,
@@ -58,9 +59,9 @@ const FESTIVALS = [
     lat:35.07, lon:136.69, place:"桑名市 揖斐川河畔(鍋屋堤)",
     venue:"river", venueLabel:"揖斐川の川面", maxLabel:"東海最大級の二尺玉", maxDiaM:600,
     access:"名古屋から:近鉄特急で約20分（桑名駅から徒歩20分）",
-    tickets:[{label:"観覧席（全席有料・事前購入制）", type:"sale", start:null, end:null}],
-    ticketNote:"2026年は三重初のドローンショーも。人気席は早期完売に注意",
-    url:"https://hanabi.walkerplus.com/detail/ar0624e00834/",
+    tickets:[], statusOverride:{kind:"soldout", label:"公式販売終了（完売）"},
+    ticketNote:"楽天チケットの公式販売は終了（完売とみられる）。例年は当日券エリアの設定例あり。2026年は三重初のドローンショーも",
+    url:"https://kuwana-hanabi.com/",
     note:"1934年から続く水郷の花火。直径約600mの二尺玉が名物。" },
   { id:"fukuroi", name:"ふくろい遠州の花火", pref:"静岡",
     date:"2026-07-25", dateLabel:"7/25(土) 19:20〜21:00", verified:true,
@@ -69,7 +70,8 @@ const FESTIVALS = [
     venue:"river", venueLabel:"原野谷川の河畔", maxLabel:"尺玉・空中ナイアガラ", maxDiaM:320,
     access:"名古屋から:新幹線+JRで約80分（愛野駅・袋井駅から徒歩20分）",
     tickets:[{label:"有料席 約3.1万席（ブロック席5,500円〜）", type:"sale", start:"2026-06-13", end:null}],
-    ticketNote:"6/13から販売中",
+    statusOverride:{kind:"sale", label:"販売中（一部完売）"},
+    ticketNote:"イス席A〜D(7,500円)・ブロック席(5,500円)は販売中。ペアイス席・カメラ席は完売、ファミリー席は残少（6/29時点）",
     url:"https://www.fukuroi-hanabi.jp/",
     note:"全国の花火名人による選抜競技大会。日本十大花火のひとつ。" },
   { id:"ise", name:"伊勢神宮奉納全国花火大会", pref:"三重",
@@ -90,8 +92,8 @@ const FESTIVALS = [
     lat:35.08, lon:137.16, place:"豊田市 白浜公園一帯(矢作川)",
     venue:"river", venueLabel:"矢作川の河川敷", maxLabel:"メロディ花火・大ナイアガラ", maxDiaM:300,
     access:"名古屋から:名鉄で約60分（豊田市駅から徒歩10分）",
-    tickets:[{label:"有料席", type:"sale", start:null, end:null}],
-    ticketNote:"※夏開催は2026年が最後、2027年から秋開催へ変更",
+    tickets:[{label:"個人協賛席 先着受付", type:"sale", start:"2026-07-04", end:null}],
+    ticketNote:"抽選受付は終了。残席分の先着受付が7/4開始・販売中（チケットぴあ）。※夏開催は2026年が最後、2027年から秋開催へ変更",
     url:"https://www.oidenmaturi.com/",
     note:"メロディ花火・大手筒・ナイアガラ。中部有数の規模で約35万人が来場。" },
   { id:"gamagori", name:"蒲郡まつり納涼花火大会", pref:"愛知",
@@ -100,8 +102,8 @@ const FESTIVALS = [
     lat:34.82, lon:137.22, place:"蒲郡市 竹島ふ頭周辺(三河湾)",
     venue:"sea", venueLabel:"三河湾の海上", maxLabel:"正三尺玉×3発（太平洋岸最大級）", maxDiaM:650,
     access:"名古屋から:JR・名鉄で約50分（蒲郡駅から徒歩3分）",
-    tickets:[{label:"有料席", type:"sale", start:null, end:null}],
-    ticketNote:"販売状況は公式発表を確認",
+    tickets:[{label:"特別観覧エリア（シングル6,000円〜）", type:"sale", start:"2026-05-27", end:null}],
+    ticketNote:"5/27から先着募集中（今年は販売数増）。完売告知なし",
     url:"https://hanabi.walkerplus.com/detail/ar0623e00800/",
     note:"直径約650mに開く正三尺玉が3発。全国でも数えるほどの大玉が海上に咲く。" },
   { id:"okazaki", name:"岡崎城下家康公夏まつり 第78回花火大会", pref:"愛知",
@@ -111,9 +113,9 @@ const FESTIVALS = [
     venue:"river", venueLabel:"乙川河畔・岡崎城を背景に", maxLabel:"三河花火・金魚花火・仕掛花火", maxDiaM:320,
     access:"名古屋から:名鉄で約30分（東岡崎駅・岡崎公園前駅から徒歩10分）",
     tickets:[
-      {label:"市民先行販売", type:"sale", start:"2026-06-12", end:"2026-06-29"},
-      {label:"一般販売・ふるさと納税席", type:"sale", start:"2026-06-06", end:null}],
-    ticketNote:"注意: 打上会場近くに無料観覧エリアなし（チケット必須）",
+      {label:"市民先行販売（抽選）", type:"lottery", start:"2026-06-12", end:"2026-06-29"},
+      {label:"一般販売（先着）", type:"sale", start:"2026-07-11", end:null}],
+    ticketNote:"市民先行・ふるさと納税枠は受付終了。一般販売は7/11(土)10:00開始（先着・売切次第終了）。打上会場近くに無料観覧エリアなし（チケット必須）",
     url:"https://okazaki-kanko.jp/feature/hanabitaikai/hanabitokusyu",
     note:"三河花火発祥の地・家康公生誕の地の伝統花火。お城×花火の構図は全国的にも希少。" },
   { id:"nagaragawa", name:"ぎふ長良川花火大会", pref:"岐阜",
@@ -122,9 +124,9 @@ const FESTIVALS = [
     lat:35.44, lon:136.77, place:"岐阜市 長良川河畔(長良橋〜金華橋)",
     venue:"river", venueLabel:"長良川・金華山を背景に", maxLabel:"尺玉・ワイドスターマイン", maxDiaM:320,
     access:"名古屋から:JRで約20分+バス（岐阜駅からバス15分）",
-    tickets:[{label:"有料観覧席", type:"sale", start:null, end:null}],
-    ticketNote:"公式サイトで販売",
-    url:"https://www.kankou-gifu.jp/event/detail_3786.html",
+    tickets:[{label:"有料観覧席 一般販売（先着）", type:"sale", start:"2026-07-08", end:"2026-08-08"}],
+    ticketNote:"市民先行・EX会員先行は終了。一般販売は7/8(水)10:00開始（ネット・セブンイレブン、予定席数に達し次第終了）",
+    url:"https://nagara-hanabi.jp/",
     note:"旧「全国選抜長良川中日花火大会」と「全国花火大会」が2023年に統合して誕生した大会。" },
   { id:"tokai", name:"東海まつり花火大会", pref:"愛知",
     date:"2026-08-08", dateLabel:"8/8(土) 19:20〜20:30", verified:true,
@@ -183,9 +185,9 @@ const FESTIVALS = [
     venue:"sea", venueLabel:"七里御浜の海上・鬼ヶ城", maxLabel:"三尺玉海上自爆・鬼ヶ城大仕掛け", maxDiaM:600,
     access:"名古屋から:特急南紀で約3時間／車で約2時間半（宿泊推奨）",
     tickets:[
-      {label:"カメラ席（抽選）", type:"lottery", start:"2026-07-07", end:"2026-07-17"},
-      {label:"堤防席（先着・再受付）", type:"sale", start:null, end:null}],
-    ticketNote:"浜席・ふるさと納税枠もあり。詳細は公式サイトで",
+      {label:"浜席 一般発売（先着）", type:"sale", start:"2026-07-01", end:"2026-08-16"},
+      {label:"協賛観覧席・カメラ席（抽選）", type:"lottery", start:"2026-07-07", end:"2026-07-17"}],
+    ticketNote:"浜席はチケットぴあで販売中（〜8/16 17:00）。堤防席限定抽選は受付終了。ふるさと納税枠もあり",
     url:"https://www.kumano-kankou.info/kumano-fireworks/",
     note:"世界遺産・鬼ヶ城の岩場で炸裂する大仕掛けは全身に響く迫力。" },
   { id:"kihoku", name:"きほく燈籠祭", pref:"三重",
@@ -271,6 +273,7 @@ function festivalStatus(f) {
 }
 const STATUS_STYLE = {
   sale:    { bg:"#1d4d3a", fg:"#7ce8b5" },
+  soldout: { bg:"#4d1d2b", fg:"#ff9db4" },
   lottery: { bg:"#4d3a1d", fg:"#ffd97a" },
   upcoming:{ bg:"#1d3a4d", fg:"#7ad0ff" },
   closed:  { bg:"#3a2430", fg:"#d89aab" },
@@ -288,13 +291,7 @@ const invLon = (x) => LON0 + (x / MW) * (LON1 - LON0);
 const invLat = (y) => LAT1 - (y / MH) * (LAT1 - LAT0);
 const path = (arr) => "M" + arr.map(([lo,la]) => `${px(lo).toFixed(1)} ${py(la).toFixed(1)}`).join(" L") + " Z";
 
-const AICHI = path([[136.68,35.14],[136.78,35.2],[136.9,35.22],[137.05,35.26],[137.25,35.3],[137.45,35.35],[137.58,35.44],[137.75,35.33],[137.72,35.18],[137.65,35.05],[137.58,34.93],[137.5,34.83],[137.45,34.76],[137.4,34.72],[137.25,34.64],[137.1,34.6],[137.01,34.58],[137.08,34.63],[137.2,34.67],[137.3,34.7],[137.36,34.74],[137.3,34.79],[137.22,34.82],[137.12,34.8],[137.03,34.83],[136.99,34.79],[136.97,34.86],[136.95,34.78],[136.93,34.72],[136.92,34.69],[136.86,34.73],[136.82,34.82],[136.8,34.92],[136.83,35.0],[136.85,35.06],[136.78,35.08],[136.7,35.05]]);
-const MIE = path([[136.68,35.14],[136.55,35.22],[136.45,35.25],[136.35,35.2],[136.25,35.15],[136.2,35.0],[136.05,34.9],[136.0,34.75],[136.1,34.62],[136.05,34.5],[136.0,34.35],[136.02,34.2],[135.98,34.05],[135.92,33.9],[135.88,33.75],[135.98,33.72],[136.0,33.78],[136.08,33.88],[136.15,33.98],[136.22,34.07],[136.3,34.14],[136.35,34.2],[136.45,34.24],[136.55,34.27],[136.65,34.27],[136.75,34.26],[136.85,34.3],[136.9,34.33],[136.88,34.42],[136.85,34.48],[136.78,34.5],[136.68,34.53],[136.6,34.58],[136.55,34.68],[136.53,34.75],[136.58,34.85],[136.63,34.95],[136.68,35.05],[136.7,35.1]]);
-const GIFU = path([[136.35,35.2],[136.45,35.25],[136.55,35.22],[136.68,35.14],[136.78,35.2],[136.9,35.22],[137.05,35.26],[137.25,35.3],[137.45,35.35],[137.58,35.44],[137.6,35.6],[137.55,35.8],[137.62,35.95],[137.55,36.1],[137.62,36.25],[137.55,36.4],[137.4,36.46],[137.2,36.5],[137.0,36.47],[136.85,36.35],[136.7,36.28],[136.6,36.15],[136.55,36.0],[136.42,35.85],[136.4,35.7],[136.3,35.55],[136.28,35.42],[136.32,35.3]]);
-const SHIZUOKA = path([[137.5,34.83],[137.58,34.93],[137.65,35.05],[137.72,35.18],[137.75,35.33],[137.9,35.4],[138.1,35.45],[138.2,35.62],[138.35,35.55],[138.45,35.42],[138.6,35.38],[138.75,35.4],[138.85,35.32],[139.0,35.28],[139.12,35.2],[139.16,35.12],[139.08,35.05],[139.1,34.95],[139.05,34.82],[139.0,34.7],[138.98,34.62],[138.85,34.6],[138.77,34.66],[138.74,34.78],[138.78,34.92],[138.86,35.05],[138.72,35.12],[138.55,35.05],[138.4,34.98],[138.35,34.9],[138.3,34.78],[138.24,34.65],[138.22,34.6],[138.05,34.63],[137.85,34.66],[137.7,34.68],[137.62,34.68],[137.55,34.7],[137.5,34.75]]);
 const HAMANA = path([[137.53,34.7],[137.6,34.7],[137.63,34.76],[137.58,34.8],[137.52,34.77]]);
-const WESTLAND = path([[135.55,36.3],[136.28,35.6],[136.32,35.3],[136.35,35.2],[136.25,35.15],[136.2,35.0],[136.05,34.9],[136.0,34.75],[136.1,34.62],[136.02,34.2],[135.92,33.9],[135.88,33.72],[135.55,33.66]]);
-const NORTHLAND = path([[135.55,36.75],[139.5,36.75],[139.5,35.38],[139.16,35.14],[139.0,35.3],[138.85,35.34],[138.75,35.42],[138.6,35.4],[138.45,35.44],[138.35,35.58],[138.2,35.65],[138.1,35.48],[137.9,35.43],[137.75,35.36],[137.6,35.62],[137.56,35.8],[137.63,35.95],[137.56,36.1],[137.63,36.25],[137.56,36.42],[137.4,36.5],[137.2,36.54],[137.0,36.5],[136.85,36.38],[136.7,36.3],[136.58,36.17],[136.53,36.0],[136.4,35.87],[136.38,35.7],[136.28,35.55],[135.55,36.15]]);
 const BIWAKO = path([[135.98,35.0],[136.08,35.05],[136.18,35.18],[136.27,35.4],[136.16,35.44],[136.03,35.28],[135.92,35.1]]);
 const PREF_LABEL = { 岐阜:[136.92,35.9], 愛知:[137.18,35.06], 三重:[136.3,34.6], 静岡:[138.35,35.08] };
 const DEPTH = 8;
@@ -647,11 +644,23 @@ export default function App() {
     setTimeout(()=>detailRef.current.scrollIntoView({behavior:"smooth",block:"start"}), 60);
   }, [selected]);
 
+  // 県フィルタに応じた地図ズーム（viewBox座標系でのscale+translate）
+  const zoom = useMemo(()=>{
+    const bb = TOKAI_BBOX[prefFilter];
+    if (!bb) return { k:1, x:0, y:0 };
+    const MHD = MH + DEPTH, pad = 16;
+    const k = Math.min(MW/(bb[2]+pad*2), MHD/(bb[3]+pad*2), 2.6);
+    let x = bb[0]+bb[2]/2 - MW/(2*k), y = bb[1]+bb[3]/2 - MHD/(2*k);
+    x = Math.max(0, Math.min(x, MW - MW/k));
+    y = Math.max(0, Math.min(y, MHD - MHD/k));
+    return { k:+k.toFixed(3), x:+x.toFixed(1), y:+y.toFixed(1) };
+  }, [prefFilter]);
+
   const onMapClick = (e) => {
     if (!adding || !svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
-    const x = ((e.clientX-rect.left)/rect.width)*MW;
-    const y = ((e.clientY-rect.top)/rect.height)*(MH+DEPTH);
+    const x = (((e.clientX-rect.left)/rect.width)*MW)/zoom.k + zoom.x;
+    const y = (((e.clientY-rect.top)/rect.height)*(MH+DEPTH))/zoom.k + zoom.y;
     setTempPos({ lat:invLat(y), lon:invLon(x) });
   };
   const saveCustom = (d) => {
@@ -736,43 +745,53 @@ export default function App() {
               </filter>
             </defs>
             <rect width={MW} height={MH+DEPTH} fill="url(#sea)" rx={12}/>
+            <g style={{transform:`scale(${zoom.k}) translate(${-zoom.x}px, ${-zoom.y}px)`,
+              transition:"transform 0.75s cubic-bezier(0.25,0.8,0.25,1)"}}>
             {[0.55,0.64,0.73,0.82,0.9].map((t,i)=>(
               <path key={i} d={`M0 ${MH*t} Q ${MW*0.25} ${MH*t-6}, ${MW*0.5} ${MH*t} T ${MW} ${MH*t}`}
                 stroke="rgba(120,160,220,0.07)" fill="none" strokeWidth={1.4}/>
             ))}
-            <path d={WESTLAND} fill="#161f3a" opacity={0.85}/>
-            <path d={NORTHLAND} fill="#161f3a" opacity={0.85}/>
-            <path d={BIWAKO} fill="#0e2142"/>
-            <text x={px(136.1)} y={py(35.24)} fontSize={8.5} fill="#4e6398" textAnchor="middle"
-              style={{fontFamily:"serif",fontStyle:"italic"}}>琵琶湖</text>
-            {[["伊勢湾",136.78,34.86],["三河湾",137.16,34.73],["遠州灘",137.95,34.44],["熊野灘",136.5,33.76],["駿河湾",138.56,34.78]].map(([n,lo,la])=>(
-              <text key={n} x={px(lo)} y={py(la)} fontSize={9.5} fill="#4e6398" textAnchor="middle"
-                style={{fontFamily:"serif",fontStyle:"italic",letterSpacing:2}}>{n}</text>
+            {OTHER_LAND.map((d,i)=>(
+              <path key={i} d={d} fill="#141d38" fillRule="evenodd" stroke="#22305a"
+                strokeWidth={0.6} vectorEffect="non-scaling-stroke" opacity={0.9}/>
             ))}
-            {[["岐阜",GIFU],["静岡",SHIZUOKA],["三重",MIE],["愛知",AICHI]].map(([name,d])=>{
+            <path d={BIWAKO} fill="#0e2142"/>
+            <g opacity={zoom.k>1?0:1} style={{transition:"opacity 0.5s"}}>
+              <text x={px(136.1)} y={py(35.24)} fontSize={8.5} fill="#4e6398" textAnchor="middle"
+                style={{fontFamily:"serif",fontStyle:"italic"}}>琵琶湖</text>
+              {[["伊勢湾",136.78,34.86],["三河湾",137.16,34.73],["遠州灘",137.95,34.44],["熊野灘",136.5,33.76],["駿河湾",138.56,34.78]].map(([n,lo,la])=>(
+                <text key={n} x={px(lo)} y={py(la)} fontSize={9.5} fill="#4e6398" textAnchor="middle"
+                  style={{fontFamily:"serif",fontStyle:"italic",letterSpacing:2}}>{n}</text>
+              ))}
+            </g>
+            {["岐阜","静岡","三重","愛知"].map((name)=>{
+              const d = TOKAI_PATHS[name];
               const active = prefFilter==="すべて"||prefFilter===name||prefFilter==="番外";
               return (
-                <g key={name} opacity={active?1:0.35}>
-                  <path d={d} transform={`translate(0,${DEPTH})`} fill="#0d1530" stroke="#0d1530" strokeWidth={1.5}/>
-                  <path d={d} transform={`translate(0,${DEPTH/2})`} fill="#182346"/>
-                  <path d={d} fill="url(#land)" stroke="#7288bd" strokeWidth={1.1} strokeLinejoin="round"/>
+                <g key={name} opacity={active?1:0.35} style={{transition:"opacity 0.5s"}}>
+                  <path d={d} fillRule="evenodd" transform={`translate(0,${DEPTH})`} fill="#0d1530" stroke="#0d1530" strokeWidth={1.5}/>
+                  <path d={d} fillRule="evenodd" transform={`translate(0,${DEPTH/2})`} fill="#182346"/>
+                  <path d={d} fillRule="evenodd" fill="url(#land)" stroke="#7288bd" strokeWidth={1.1}
+                    strokeLinejoin="round" vectorEffect="non-scaling-stroke"/>
                 </g>
               );
             })}
             <path d={HAMANA} fill="#0e2142" opacity={0.95}/>
             {Object.entries(PREF_LABEL).map(([name,[lo,la]])=>(
-              <text key={name} x={px(lo)} y={py(la)} fontSize={13} fill="#a3b4de"
-                textAnchor="middle" style={{fontFamily:"serif",letterSpacing:3}}>{name}</text>
+              <g key={name} transform={`translate(${px(lo)} ${py(la)}) scale(${1/zoom.k})`}>
+                <text fontSize={13} fill="#a3b4de" textAnchor="middle"
+                  style={{fontFamily:"serif",letterSpacing:3}}>{name}</text>
+              </g>
             ))}
-            <g>
-              <circle cx={px(136.9)} cy={py(35.17)} r={3.2} fill="#fff"/>
-              <circle cx={px(136.9)} cy={py(35.17)} r={6.5} fill="none" stroke="#fff" strokeWidth={0.7} opacity={0.5}/>
-              <text x={px(136.9)+8} y={py(35.17)+3.5} fontSize={9.5} fill="#e6ecff">名古屋</text>
+            <g transform={`translate(${px(136.9)} ${py(35.17)}) scale(${1/zoom.k})`}>
+              <circle r={3.2} fill="#fff"/>
+              <circle r={6.5} fill="none" stroke="#fff" strokeWidth={0.7} opacity={0.5}/>
+              <text x={8} y={3.5} fontSize={9.5} fill="#e6ecff">名古屋</text>
             </g>
             {tempPos && (
-              <g>
-                <circle cx={px(tempPos.lon)} cy={py(tempPos.lat)} r={7} fill="none" stroke="#7ce8b5" strokeWidth={1.5}/>
-                <circle cx={px(tempPos.lon)} cy={py(tempPos.lat)} r={2.5} fill="#7ce8b5"/>
+              <g transform={`translate(${px(tempPos.lon)} ${py(tempPos.lat)}) scale(${1/zoom.k})`}>
+                <circle r={7} fill="none" stroke="#7ce8b5" strokeWidth={1.5}/>
+                <circle r={2.5} fill="#7ce8b5"/>
               </g>
             )}
             {list.map((f,i)=>{
@@ -782,38 +801,40 @@ export default function App() {
               const ended = f.date < TODAY;
               const dur = (1.4 + (i%5)*0.25).toFixed(2);
               return (
-                <g key={f.id} onClick={(e)=>{ if(!adding){ e.stopPropagation(); setSelected(f.id);} }}
+                <g key={f.id} transform={`translate(${px(f.lon)} ${py(f.lat)}) scale(${1/zoom.k})`}
+                   onClick={(e)=>{ if(!adding){ e.stopPropagation(); setSelected(f.id);} }}
                    style={{cursor:adding?"crosshair":"pointer"}} opacity={dim?0.35:(ended?0.5:1)}
                    tabIndex={0} onKeyDown={e=>e.key==="Enter"&&setSelected(f.id)}>
-                  <circle cx={px(f.lon)} cy={py(f.lat)} r={r+6} fill="#ffb347" opacity={0.18} filter="url(#glow)">
+                  <circle r={r+6} fill="#ffb347" opacity={0.18} filter="url(#glow)">
                     <animate attributeName="opacity" values="0.1;0.32;0.1" dur={`${dur}s`} repeatCount="indefinite"/>
                   </circle>
-                  <circle cx={px(f.lon)} cy={py(f.lat)} r={r}
+                  <circle r={r}
                     fill={f.isCustom?"#7ce8b5":(sel?"#ffe08a":"#ffb347")}
                     stroke={sel?"#fff":"#ffd97a"} strokeWidth={sel?2:0.8} filter="url(#glow)">
                     <animate attributeName="r" values={`${r};${r*1.25};${r}`} dur={`${dur}s`} repeatCount="indefinite"/>
                   </circle>
                   <g stroke={sel?"#fff":"#ffd97a"} strokeWidth={0.9} opacity={0.8}>
-                    <line x1={px(f.lon)-r-4} y1={py(f.lat)} x2={px(f.lon)+r+4} y2={py(f.lat)}>
+                    <line x1={-r-4} y1={0} x2={r+4} y2={0}>
                       <animate attributeName="opacity" values="0;0.9;0" dur={`${dur}s`} repeatCount="indefinite"/>
                     </line>
-                    <line x1={px(f.lon)} y1={py(f.lat)-r-4} x2={px(f.lon)} y2={py(f.lat)+r+4}>
+                    <line x1={0} y1={-r-4} x2={0} y2={r+4}>
                       <animate attributeName="opacity" values="0;0.9;0" dur={`${dur}s`} repeatCount="indefinite"/>
                     </line>
                   </g>
                   {sel && (
                     <>
-                      <circle cx={px(f.lon)} cy={py(f.lat)} r={r+5} fill="none" stroke="#ffd97a" strokeWidth={1.5}>
+                      <circle r={r+5} fill="none" stroke="#ffd97a" strokeWidth={1.5}>
                         <animate attributeName="r" values={`${r+3};${r+13};${r+3}`} dur="1.6s" repeatCount="indefinite"/>
                         <animate attributeName="opacity" values="0.9;0;0.9" dur="1.6s" repeatCount="indefinite"/>
                       </circle>
-                      <text x={px(f.lon)} y={py(f.lat)-r-9} fontSize={10.5} fill="#ffe08a" textAnchor="middle"
+                      <text y={-r-9} fontSize={10.5} fill="#ffe08a" textAnchor="middle"
                         fontWeight="bold" style={{paintOrder:"stroke",stroke:"#060c20",strokeWidth:3}}>{f.name}</text>
                     </>
                   )}
                 </g>
               );
             })}
+            </g>
           </svg>
           <div style={{fontSize:10.5,color:"#7d8db5",padding:"2px 8px 4px"}}>
             光っている点が花火大会（緑 = 自分で追加した大会）。大きさ = 打ち上げ数。</div>
