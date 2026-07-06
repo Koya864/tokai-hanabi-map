@@ -63,12 +63,12 @@ function makeSprite(color, size=28) {
 }
 
 // ── オープニング ──
-function Intro({ onDone }) {
+function Intro({ onDone, onFadeStart }) {
   const ref = useRef(null);
   const [fading, setFading] = useState(false);
   const doneRef = useRef(false);
   const finish = () => { if (doneRef.current) return; doneRef.current = true;
-    setFading(true); setTimeout(onDone, 600); };
+    onFadeStart && onFadeStart(); setFading(true); setTimeout(onDone, 900); };
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { onDone(); return; }
     const cv = ref.current; const ctx = cv.getContext("2d");
@@ -122,7 +122,7 @@ function Intro({ onDone }) {
       ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
       if (parts.length>3200) parts.splice(0, parts.length-3200);
       // フェード開始後もアニメを止めない → 花火が動いたまま画面へクロスフェード
-      if (el>3.6) finish();
+      if (el>5.2) finish();
       raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
@@ -131,7 +131,7 @@ function Intro({ onDone }) {
   return (
     <div onClick={finish}
       style={{position:"fixed",inset:0,zIndex:60,background:"#04060f",cursor:"pointer",
-        opacity:fading?0:1,transition:"opacity 0.6s ease",pointerEvents:fading?"none":"auto"}}>
+        opacity:fading?0:1,transition:"opacity 0.9s ease",pointerEvents:fading?"none":"auto"}}>
       <canvas ref={ref} style={{position:"absolute",inset:0,width:"100%",height:"100%"}}/>
       <style>{`
         @keyframes introTitle { 0%{opacity:0; letter-spacing:14px; transform:translateY(10px);}
@@ -324,6 +324,9 @@ const PREF_FILTERS = ["すべて","愛知","岐阜","三重","静岡","番外"];
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
+  // 本編は「オープニングが不透明で隠している間」は描画を遅らせる。
+  // 30個のアニメーション付きマーカーを裏で初回描画すると、冒頭の花火がカクつくため。
+  const [showContent, setShowContent] = useState(false);
   const [selected, setSelected] = useState(null);
   const [prefFilter, setPrefFilter] = useState("すべて");
   const detailRef = useRef(null);
@@ -356,8 +359,9 @@ export default function App() {
   return (
     <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0b1226 0%,#111a36 60%,#16213f 100%)",
       color:"#eef2fb",fontFamily:"'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif",paddingBottom:40}}>
-      {showIntro && <Intro onDone={()=>setShowIntro(false)} />}
-      <div style={{maxWidth:520,margin:"0 auto",padding:"20px 16px 0"}}>
+      {showIntro && <Intro onDone={()=>{setShowIntro(false); setShowContent(true);}}
+        onFadeStart={()=>setShowContent(true)} />}
+      {showContent && <div style={{maxWidth:520,margin:"0 auto",padding:"20px 16px 0"}}>
 
         <header style={{marginBottom:14}}>
           <div style={{fontSize:11,letterSpacing:3,color:"#ffb347"}}>TOKAI HANABI MAP 2026</div>
@@ -597,13 +601,13 @@ export default function App() {
         <div style={{textAlign:"center",margin:"22px 0 6px",display:"flex",
           flexDirection:"column",alignItems:"center",gap:6}}>
           <span style={{width:26,height:1,background:"linear-gradient(90deg,transparent,#3d4f7d,transparent)"}}/>
-          <a href="https://lifeshift-group.com" target="_blank" rel="noopener noreferrer"
-            style={{fontSize:11,letterSpacing:3,color:"#8a97bd",textDecoration:"none"}}>
+          <div style={{fontSize:11,letterSpacing:3,color:"#8a97bd"}}>
             <span style={{color:"#6e7ea8"}}>presented by</span>{" "}
-            <span style={{color:"#ffb347",fontWeight:700}}>Life Shift</span>
-          </a>
+            <a href="https://lifeshift-group.com/" target="_blank" rel="noopener noreferrer"
+              style={{color:"#ffb347",fontWeight:700,textDecoration:"none"}}>Life Shift</a>
+          </div>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
