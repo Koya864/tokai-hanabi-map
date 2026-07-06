@@ -362,7 +362,7 @@ export default function App() {
           <h1 style={{margin:"4px 0 2px",fontSize:24,fontWeight:800,fontFamily:"'Hiragino Mincho ProN',serif"}}>
             東海4県 花火大会マップ
           </h1>
-          <div style={{fontSize:12,color:"#9fb0d8"}}>{ALL.length}大会を収録。チケット状況は本日({TODAY.slice(5).replace("-","/")})時点で自動判定。</div>
+          <div style={{fontSize:12,color:"#9fb0d8"}}>東海4県＋近郊の花火大会。チケット状況は本日({TODAY.slice(5).replace("-","/")})時点で自動判定。</div>
         </header>
 
         <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
@@ -527,7 +527,7 @@ export default function App() {
               打上ペースは <b style={{color:"#ffd97a"}}>1分あたり約{Math.round(fest.shells/fest.durationMin)}発</b>（実時間で再現）。
             </div>
 
-            <div style={{fontSize:11,color:"#ffb347",letterSpacing:2,marginBottom:8}}>収録{ALL.length}大会での規模比較</div>
+            <div style={{fontSize:11,color:"#ffb347",letterSpacing:2,marginBottom:8}}>収録大会での規模比較</div>
             <ScaleBar all={ALL} current={fest.id} />
 
             <div style={{marginTop:14,padding:12,background:"#0d1530",borderRadius:12}}>
@@ -561,7 +561,7 @@ export default function App() {
           </div>
         );})()}
 
-        <div style={{fontSize:11,color:"#ffb347",letterSpacing:2,margin:"4px 0 8px"}}>開催日順リスト（{list.length}大会）</div>
+        <div style={{fontSize:11,color:"#ffb347",letterSpacing:2,margin:"4px 0 8px"}}>開催日順リスト</div>
         {list.map(f=>{ const st = festivalStatus(f); const sty = STATUS_STYLE[st.kind];
           const ended = f.date < TODAY;
           return (
