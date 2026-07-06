@@ -570,7 +570,7 @@ const inputStyle = {width:"100%",boxSizing:"border-box",background:"#0d1530",bor
 // ── 追加フォーム ──
 function AddForm({ tempPos, onSave, onCancel }) {
   const [d, setD] = useState({ name:"", pref:"愛知", date:"2026-08-01", shells:"5000",
-    durationMin:"60", place:"", venue:"river", url:"", ticketNote:"", note:"" });
+    durationMin:"60", place:"", venue:"river", url:"", ticketEnd:"", ticketNote:"", note:"" });
   const set = (k) => (e) => setD({...d, [k]:e.target.value});
   const canSave = d.name.trim() && tempPos;
   return (
@@ -597,6 +597,12 @@ function AddForm({ tempPos, onSave, onCancel }) {
       </div>
       <input style={inputStyle} placeholder="場所（例: ◯◯市 ◯◯河畔）" value={d.place} onChange={set("place")}/>
       <input style={inputStyle} placeholder="公式サイトURL（任意）" value={d.url} onChange={set("url")}/>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+        <span style={{fontSize:11.5,color:"#9fb0d8",whiteSpace:"nowrap"}}>チケット申込期限（任意）</span>
+        <input style={{...inputStyle,flex:1,marginBottom:0}} type="date" value={d.ticketEnd} onChange={set("ticketEnd")}/>
+      </div>
+      <div style={{fontSize:10.5,color:"#7d8db5",margin:"-4px 0 8px 2px"}}>
+        期限を入れると、それまで「販売中」・過ぎたら自動で「受付終了」になります（未入力なら「要確認」）</div>
       <input style={inputStyle} placeholder="チケットのメモ（任意）" value={d.ticketNote} onChange={set("ticketNote")}/>
       <input style={inputStyle} placeholder="見どころメモ（任意）" value={d.note} onChange={set("note")}/>
       <div style={{display:"flex",gap:8,marginTop:4}}>
@@ -671,7 +677,9 @@ export default function App() {
       durationMin:Math.max(parseInt(d.durationMin)||60,10),
       lat:tempPos.lat, lon:tempPos.lon, place:d.place||"（場所未記入）",
       venue:d.venue, venueLabel:d.place||"会場", maxLabel:"尺玉クラス（仮）", maxDiaM:300,
-      access:"（アクセスは未記入）", tickets:[], ticketNote:d.ticketNote||"（未記入）",
+      access:"（アクセスは未記入）",
+      tickets: d.ticketEnd ? [{label:"チケット受付", type:"sale", start:null, end:d.ticketEnd}] : [],
+      ticketNote:d.ticketNote||"（未記入）",
       url:d.url||"https://hanabi.walkerplus.com/list/ar0600/", note:d.note||"", isCustom:true };
     persist([...custom, f]);
     setAdding(false); setTempPos(null); setSelected(f.id);
