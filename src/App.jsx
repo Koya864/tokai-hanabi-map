@@ -68,7 +68,7 @@ function Intro({ onDone }) {
   const [fading, setFading] = useState(false);
   const doneRef = useRef(false);
   const finish = () => { if (doneRef.current) return; doneRef.current = true;
-    setFading(true); setTimeout(onDone, 900); };
+    setFading(true); setTimeout(onDone, 600); };
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { onDone(); return; }
     const cv = ref.current; const ctx = cv.getContext("2d");
@@ -121,7 +121,7 @@ function Intro({ onDone }) {
         return true; });
       ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
       if (parts.length>3200) parts.splice(0, parts.length-3200);
-      if (el>5.2) finish(); else raf = requestAnimationFrame(frame);
+      if (el>4.0) finish(); else raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
@@ -129,7 +129,7 @@ function Intro({ onDone }) {
   return (
     <div onClick={finish}
       style={{position:"fixed",inset:0,zIndex:60,background:"#04060f",cursor:"pointer",
-        opacity:fading?0:1,transition:"opacity 0.9s ease",pointerEvents:fading?"none":"auto"}}>
+        opacity:fading?0:1,transition:"opacity 0.6s ease",pointerEvents:fading?"none":"auto"}}>
       <canvas ref={ref} style={{position:"absolute",inset:0,width:"100%",height:"100%"}}/>
       <style>{`
         @keyframes introTitle { 0%{opacity:0; letter-spacing:14px; transform:translateY(10px);}
