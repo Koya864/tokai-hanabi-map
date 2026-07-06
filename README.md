@@ -53,3 +53,9 @@ npm run deploy   # dist を gh-pages ブランチへ公開
 ## 地図データの再生成
 
 県境界は `src/mapData.js`（実データを簡略化してSVG化）。作り直す場合は `scripts/gen-map.mjs` を参照。
+
+## アイコン・OGP画像の再生成
+
+ファビコンと共有プレビュー画像は `public/` に生成済み（`favicon.svg` / `favicon-32.png` / `apple-touch-icon.png` / `og.png`）。
+デザインを変えたいときは `scripts/gen-assets.mjs` を編集して `node scripts/gen-assets.mjs` で再生成（sharp が必要: `npm install`）。
+`<head>` のタイトル・説明文・OGPタグは `index.html` にあります。
