@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { TOKAI_PATHS, TOKAI_BBOX, OTHER_LAND } from "./mapData.js";
 
 // ═════════════════════════════════════════════════════════════
-// ■ データの追加方法（プログラムを触ったことがなくてもOK）
+// ■ 大会データの編集方法（このファイルの管理者のみ）
 //
-// 方法1: アプリ内の「＋ 大会を追加」ボタンから入力（おすすめ）
-//        → ブラウザに保存され、次回開いても残ります
-// 方法2: 下の FESTIVALS に1ブロックをコピペして書き換える
+// 下の FESTIVALS 配列に1ブロックをコピペして書き換え、
+// `npm run deploy` で公開サイトに反映します。
+// （閲覧者が画面から編集することはできません）
 //
 // ── コピペ用テンプレート ──────────────────────────
 // { id:"unique-id",                  // 半角英数のユニークな名前
@@ -287,8 +287,6 @@ const MW = 460, MH = 440;
 const LON0 = 135.55, LON1 = 139.5, LAT0 = 33.35, LAT1 = 36.75;
 const px = (lon) => ((lon - LON0) / (LON1 - LON0)) * MW;
 const py = (lat) => ((LAT1 - lat) / (LAT1 - LAT0)) * MH;
-const invLon = (x) => LON0 + (x / MW) * (LON1 - LON0);
-const invLat = (y) => LAT1 - (y / MH) * (LAT1 - LAT0);
 const path = (arr) => "M" + arr.map(([lo,la]) => `${px(lo).toFixed(1)} ${py(la).toFixed(1)}`).join(" L") + " Z";
 
 const HAMANA = path([[137.53,34.7],[137.6,34.7],[137.63,34.76],[137.58,34.8],[137.52,34.77]]);
@@ -563,82 +561,15 @@ const LinkIcon = ({size=15,color="#ffd97a"}) => (
   </svg>
 );
 const PREF_FILTERS = ["すべて","愛知","岐阜","三重","静岡","番外"];
-const STORAGE_KEY = "custom-festivals-v1";
-const inputStyle = {width:"100%",boxSizing:"border-box",background:"#0d1530",border:"1px solid #33456b",
-  borderRadius:8,color:"#eef2fb",padding:"8px 10px",fontSize:13,marginBottom:8};
-
-// ── 追加フォーム ──
-function AddForm({ tempPos, onSave, onCancel }) {
-  const [d, setD] = useState({ name:"", pref:"愛知", date:"2026-08-01", shells:"5000",
-    durationMin:"60", place:"", venue:"river", url:"", ticketEnd:"", ticketNote:"", note:"" });
-  const set = (k) => (e) => setD({...d, [k]:e.target.value});
-  const canSave = d.name.trim() && tempPos;
-  return (
-    <div style={{background:"#121c3a",border:"1px dashed #ffb347",borderRadius:16,padding:16,marginBottom:16}}>
-      <div style={{fontSize:13,fontWeight:700,color:"#ffd97a",marginBottom:10}}>大会を追加</div>
-      <div style={{fontSize:11.5,color:tempPos?"#7ce8b5":"#ff9db4",marginBottom:10}}>
-        {tempPos ? `✓ 位置を指定済み（緯度${tempPos.lat.toFixed(3)} / 経度${tempPos.lon.toFixed(3)}）`
-                 : "① まず上の地図をタップして開催地の位置を指定してください"}
-      </div>
-      <input style={inputStyle} placeholder="大会名（必須）" value={d.name} onChange={set("name")}/>
-      <div style={{display:"flex",gap:8}}>
-        <select style={{...inputStyle,flex:1}} value={d.pref} onChange={set("pref")}>
-          {["愛知","岐阜","三重","静岡","番外"].map(p=><option key={p}>{p}</option>)}
-        </select>
-        <input style={{...inputStyle,flex:1}} type="date" value={d.date} onChange={set("date")}/>
-      </div>
-      <div style={{display:"flex",gap:8}}>
-        <input style={{...inputStyle,flex:1}} type="number" placeholder="打上数(発)" value={d.shells} onChange={set("shells")}/>
-        <input style={{...inputStyle,flex:1}} type="number" placeholder="時間(分)" value={d.durationMin} onChange={set("durationMin")}/>
-        <select style={{...inputStyle,flex:1}} value={d.venue} onChange={set("venue")}>
-          <option value="river">川</option><option value="sea">海</option>
-          <option value="lake">湖</option><option value="park">公園</option>
-        </select>
-      </div>
-      <input style={inputStyle} placeholder="場所（例: ◯◯市 ◯◯河畔）" value={d.place} onChange={set("place")}/>
-      <input style={inputStyle} placeholder="公式サイトURL（任意）" value={d.url} onChange={set("url")}/>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-        <span style={{fontSize:11.5,color:"#9fb0d8",whiteSpace:"nowrap"}}>チケット申込期限（任意）</span>
-        <input style={{...inputStyle,flex:1,marginBottom:0}} type="date" value={d.ticketEnd} onChange={set("ticketEnd")}/>
-      </div>
-      <div style={{fontSize:10.5,color:"#7d8db5",margin:"-4px 0 8px 2px"}}>
-        期限を入れると、それまで「販売中」・過ぎたら自動で「受付終了」になります（未入力なら「要確認」）</div>
-      <input style={inputStyle} placeholder="チケットのメモ（任意）" value={d.ticketNote} onChange={set("ticketNote")}/>
-      <input style={inputStyle} placeholder="見どころメモ（任意）" value={d.note} onChange={set("note")}/>
-      <div style={{display:"flex",gap:8,marginTop:4}}>
-        <button disabled={!canSave} onClick={()=>onSave(d)}
-          style={{flex:1,padding:"10px",borderRadius:10,border:"none",cursor:canSave?"pointer":"not-allowed",
-            background:canSave?"linear-gradient(90deg,#ffb347,#ff6b6b)":"#2a3350",
-            color:canSave?"#1a0f05":"#7d8db5",fontWeight:700,fontSize:13}}>保存する</button>
-        <button onClick={onCancel} style={{padding:"10px 16px",borderRadius:10,cursor:"pointer",
-          border:"1px solid #33456b",background:"none",color:"#9fb0d8",fontSize:13}}>やめる</button>
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
   const [selected, setSelected] = useState(null);
   const [prefFilter, setPrefFilter] = useState("すべて");
-  const [custom, setCustom] = useState([]);
-  const [adding, setAdding] = useState(false);
-  const [tempPos, setTempPos] = useState(null);
   const detailRef = useRef(null);
   const svgRef = useRef(null);
 
-  // 保存済みカスタムデータの読み込み
-  useEffect(()=>{ (async()=>{
-    try { const r = await window.storage.get(STORAGE_KEY);
-      if (r?.value) setCustom(JSON.parse(r.value)); } catch(e){ /* 未保存なら無視 */ }
-  })(); },[]);
-  const persist = async (next) => {
-    setCustom(next);
-    try { await window.storage.set(STORAGE_KEY, JSON.stringify(next)); }
-    catch(e){ console.error("保存に失敗しました", e); }
-  };
-
-  const ALL = useMemo(()=>[...FESTIVALS, ...custom], [custom]);
+  const ALL = FESTIVALS;
   const fest = ALL.find(f=>f.id===selected);
   const list = useMemo(()=>{
     const l = prefFilter==="すべて" ? ALL : ALL.filter(f=>f.pref===prefFilter);
@@ -662,33 +593,6 @@ export default function App() {
     return { k:+k.toFixed(3), x:+x.toFixed(1), y:+y.toFixed(1) };
   }, [prefFilter]);
 
-  const onMapClick = (e) => {
-    if (!adding || !svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = (((e.clientX-rect.left)/rect.width)*MW)/zoom.k + zoom.x;
-    const y = (((e.clientY-rect.top)/rect.height)*(MH+DEPTH))/zoom.k + zoom.y;
-    setTempPos({ lat:invLat(y), lon:invLon(x) });
-  };
-  const saveCustom = (d) => {
-    const shells = Math.max(parseInt(d.shells)||1000, 100);
-    const f = { id:"custom-"+Date.now(), name:d.name.trim(), pref:d.pref,
-      date:d.date, dateLabel:d.date.slice(5).replace("-","/")+"（自分で追加）", verified:false,
-      shells, shellsLabel:`約${shells.toLocaleString()}発`,
-      durationMin:Math.max(parseInt(d.durationMin)||60,10),
-      lat:tempPos.lat, lon:tempPos.lon, place:d.place||"（場所未記入）",
-      venue:d.venue, venueLabel:d.place||"会場", maxLabel:"尺玉クラス（仮）", maxDiaM:300,
-      access:"（アクセスは未記入）",
-      tickets: d.ticketEnd ? [{label:"チケット受付", type:"sale", start:null, end:d.ticketEnd}] : [],
-      ticketNote:d.ticketNote||"（未記入）",
-      url:d.url||"https://hanabi.walkerplus.com/list/ar0600/", note:d.note||"", isCustom:true };
-    persist([...custom, f]);
-    setAdding(false); setTempPos(null); setSelected(f.id);
-  };
-  const deleteCustom = (id) => {
-    persist(custom.filter(c=>c.id!==id));
-    if (selected===id) setSelected(null);
-  };
-
   return (
     <div style={{minHeight:"100vh",background:"linear-gradient(180deg,#0b1226 0%,#111a36 60%,#16213f 100%)",
       color:"#eef2fb",fontFamily:"'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif",paddingBottom:40}}>
@@ -711,22 +615,11 @@ export default function App() {
                 background:prefFilter===p?"#3a2c14":"transparent",
                 color:prefFilter===p?"#ffd97a":"#aab6d6"}}>{p}</button>
           ))}
-          <button onClick={()=>{setAdding(!adding); setTempPos(null);}}
-            style={{padding:"6px 13px",borderRadius:99,border:"1px dashed #7ce8b5",fontSize:12,cursor:"pointer",
-              background:adding?"#12352a":"transparent",color:"#7ce8b5",marginLeft:"auto"}}>
-            {adding?"追加を中止":"＋ 大会を追加"}</button>
         </div>
 
         {/* 地図 */}
         <div style={{position:"relative",background:"#060c20",borderRadius:16,padding:6,border:"1px solid #223055",marginBottom:14}}>
-          {adding && (
-            <div style={{position:"absolute",top:10,left:10,right:10,zIndex:2,
-              background:"rgba(10,40,30,0.9)",border:"1px solid #7ce8b5",borderRadius:10,
-              padding:"6px 10px",fontSize:11.5,color:"#7ce8b5"}}>
-              追加モード: 地図をタップして開催地の位置を指定
-            </div>
-          )}
-          {!adding && fest && (
+          {fest && (
             <div style={{position:"absolute",top:10,left:10,right:10,zIndex:2,display:"flex",
               alignItems:"center",gap:8,background:"rgba(6,12,32,0.85)",border:"1px solid #ffb34766",
               borderRadius:10,padding:"6px 10px",backdropFilter:"blur(4px)"}}>
@@ -737,8 +630,8 @@ export default function App() {
               <span style={{fontSize:10.5,color:"#8fa2cf"}}>↓ 詳細</span>
             </div>
           )}
-          <svg ref={svgRef} onClick={onMapClick} viewBox={`0 0 ${MW} ${MH+DEPTH}`}
-            style={{width:"100%",display:"block",cursor:adding?"crosshair":"default"}}
+          <svg ref={svgRef} viewBox={`0 0 ${MW} ${MH+DEPTH}`}
+            style={{width:"100%",display:"block"}}
             role="img" aria-label="東海4県の花火大会マップ">
             <defs>
               <radialGradient id="sea" cx="55%" cy="72%" r="85%">
@@ -796,12 +689,6 @@ export default function App() {
               <circle r={6.5} fill="none" stroke="#fff" strokeWidth={0.7} opacity={0.5}/>
               <text x={8} y={3.5} fontSize={9.5} fill="#e6ecff">名古屋</text>
             </g>
-            {tempPos && (
-              <g transform={`translate(${px(tempPos.lon)} ${py(tempPos.lat)}) scale(${1/zoom.k})`}>
-                <circle r={7} fill="none" stroke="#7ce8b5" strokeWidth={1.5}/>
-                <circle r={2.5} fill="#7ce8b5"/>
-              </g>
-            )}
             {list.map((f,i)=>{
               const r = 3.8 + Math.sqrt(f.shells)/26;
               const sel = f.id===selected;
@@ -810,14 +697,14 @@ export default function App() {
               const dur = (1.4 + (i%5)*0.25).toFixed(2);
               return (
                 <g key={f.id} transform={`translate(${px(f.lon)} ${py(f.lat)}) scale(${1/zoom.k})`}
-                   onClick={(e)=>{ if(!adding){ e.stopPropagation(); setSelected(f.id);} }}
-                   style={{cursor:adding?"crosshair":"pointer"}} opacity={dim?0.35:(ended?0.5:1)}
+                   onClick={(e)=>{ e.stopPropagation(); setSelected(f.id); }}
+                   style={{cursor:"pointer"}} opacity={dim?0.35:(ended?0.5:1)}
                    tabIndex={0} onKeyDown={e=>e.key==="Enter"&&setSelected(f.id)}>
                   <circle r={r+6} fill="#ffb347" opacity={0.18} filter="url(#glow)">
                     <animate attributeName="opacity" values="0.1;0.32;0.1" dur={`${dur}s`} repeatCount="indefinite"/>
                   </circle>
                   <circle r={r}
-                    fill={f.isCustom?"#7ce8b5":(sel?"#ffe08a":"#ffb347")}
+                    fill={sel?"#ffe08a":"#ffb347"}
                     stroke={sel?"#fff":"#ffd97a"} strokeWidth={sel?2:0.8} filter="url(#glow)">
                     <animate attributeName="r" values={`${r};${r*1.25};${r}`} dur={`${dur}s`} repeatCount="indefinite"/>
                   </circle>
@@ -845,14 +732,11 @@ export default function App() {
             </g>
           </svg>
           <div style={{fontSize:10.5,color:"#7d8db5",padding:"2px 8px 4px"}}>
-            光っている点が花火大会（緑 = 自分で追加した大会）。大きさ = 打ち上げ数。</div>
+            光っている点が花火大会。大きさ = 打ち上げ数。</div>
         </div>
 
-        {adding && <AddForm tempPos={tempPos} onSave={saveCustom}
-          onCancel={()=>{setAdding(false); setTempPos(null);}}/>}
-
         {/* 詳細カード */}
-        {fest && !adding && (()=>{ const st = festivalStatus(fest); const sty = STATUS_STYLE[st.kind];
+        {fest && (()=>{ const st = festivalStatus(fest); const sty = STATUS_STYLE[st.kind];
           return (
           <div ref={detailRef} style={{scrollMarginTop:12,background:"#121c3a",border:"1px solid #4a5d8f",
             borderRadius:16,padding:16,marginBottom:16,boxShadow:"0 0 24px rgba(255,179,71,0.08)"}}>
@@ -870,10 +754,8 @@ export default function App() {
               <span style={{background:"#1b2544",borderRadius:8,padding:"4px 10px"}}>🎆 {fest.shellsLabel}</span>
               {daysUntil(fest.date)>=0 && fest.verified &&
                 <span style={{background:"#3a2c14",color:"#ffd97a",borderRadius:8,padding:"4px 10px"}}>あと{daysUntil(fest.date)}日</span>}
-              {!fest.verified && !fest.isCustom &&
+              {!fest.verified &&
                 <span style={{background:"#2a3350",color:"#9fb0d8",borderRadius:8,padding:"4px 10px"}}>⚠ 2026年日程は要確認</span>}
-              {fest.isCustom &&
-                <span style={{background:"#12352a",color:"#7ce8b5",borderRadius:8,padding:"4px 10px"}}>自分で追加</span>}
             </div>
 
             {fest.note && <div style={{fontSize:12,color:"#c7d1ec",marginBottom:10}}>{fest.note}</div>}
@@ -918,12 +800,6 @@ export default function App() {
             </div>
 
             <div style={{marginTop:10,fontSize:12,color:"#c7d1ec"}}>🚃 {fest.access}</div>
-            {fest.isCustom && (
-              <button onClick={()=>deleteCustom(fest.id)}
-                style={{marginTop:12,width:"100%",padding:"8px",borderRadius:10,cursor:"pointer",
-                  border:"1px solid #4d1d2b",background:"none",color:"#ff9db4",fontSize:12}}>
-                この大会を削除する</button>
-            )}
           </div>
         );})()}
 
@@ -935,7 +811,7 @@ export default function App() {
             <button onClick={()=>setSelected(f.id)}
               style={{display:"flex",flex:1,minWidth:0,textAlign:"left",gap:12,alignItems:"center",
                 background:f.id===selected?"#1b2544":"#121c3a",
-                border:`1px solid ${f.id===selected?"#ffb347":(f.isCustom?"#2a5a48":"#223055")}`,
+                border:`1px solid ${f.id===selected?"#ffb347":"#223055"}`,
                 borderRadius:12,padding:"10px 12px",cursor:"pointer",color:"#eef2fb"}}>
               <div style={{fontFamily:"monospace",fontSize:13,color:"#ffd97a",minWidth:44}}>
                 {f.date.slice(5).replace("-","/")}
@@ -956,7 +832,7 @@ export default function App() {
         );})}
 
         <div style={{fontSize:10.5,color:"#6e7ea8",marginTop:14,lineHeight:1.7}}>
-          ※ 2026年7月6日時点の公開情報をもとに作成。チケット状況は登録した受付期間から自動判定していますが、完売・変更の可能性があるため必ず公式サイトでご確認ください。自分で追加した大会はこのブラウザに保存されます。
+          ※ 2026年7月時点の公開情報をもとに作成。チケット状況は登録した受付期間から自動判定していますが、完売・変更の可能性があるため必ず公式サイトでご確認ください。
         </div>
       </div>
     </div>
