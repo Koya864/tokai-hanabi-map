@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build && cd dist && git init -b gh-pages && git add -A && git commit -m Deploy && git push -f https://github.com/Koya864/tokai-hanabi-map.git gh-pages && cd .. && rm -rf dist/.git"
   },
   "dependencies": {
     "react": "^18.3.1",
