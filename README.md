@@ -54,6 +54,14 @@ npm run deploy   # dist を gh-pages ブランチへ公開
 
 県境界は `src/mapData.js`（実データを簡略化してSVG化）。作り直す場合は `scripts/gen-map.mjs` を参照。
 
+## SEO（プリレンダリング）
+
+`npm run build` 時に `scripts/prerender.mjs` が走り、クローラ向けに全大会の本文HTMLと構造化データ(JSON-LD/Event)を `dist/index.html` へ焼き込み、`robots.txt` / `sitemap.xml` を出力します。
+この焼き込み本文は起動前だけ `#__splash` で隠れ、React起動後に撤去されるため**画面の見た目は変わりません**（`src/main.jsx` で撤去）。
+`festivals.js` を更新すれば本文・JSON-LDも自動で最新化されます。
+
+Google Search Console への登録（サイトマップ送信・所有権確認）は別途オーナーのGoogleアカウントでの操作が必要です。
+
 ## アイコン・OGP画像の再生成
 
 ファビコンと共有プレビュー画像は `public/` に生成済み（`favicon.svg` / `favicon-32.png` / `apple-touch-icon.png` / `og.png`）。

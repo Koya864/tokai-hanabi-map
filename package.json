@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
-    "deploy": "vite build && cd dist && touch .nojekyll && git init -b gh-pages && git add -A && git commit -m Deploy && git push -f https://github.com/Koya864/tokai-hanabi-map.git gh-pages && cd .. && rm -rf dist/.git"
+    "deploy": "npm run build && cd dist && touch .nojekyll && git init -b gh-pages && git add -A && git commit -m Deploy && git push -f https://github.com/Koya864/tokai-hanabi-map.git gh-pages && cd .. && rm -rf dist/.git"
   },
   "dependencies": {
     "react": "^18.3.1",

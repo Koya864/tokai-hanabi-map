@@ -6,6 +6,7 @@
     <title>東海4県 花火大会マップ 2026</title>
     <meta name="description" content="東海4県（愛知・岐阜・三重・静岡）＋近郊の花火大会30本を、日程・打ち上げ数・チケット状況つきのマップで。2026年夏の花火めぐりに。" />
     <meta name="theme-color" content="#0b1226" />
+    <link rel="canonical" href="https://tokai-hanabi.lifeshift-group.com/" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -32,6 +33,9 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- ↓ クローラ向けの本文はビルド時(scripts/prerender.mjs)でここに焼き込まれる -->
+    <!-- JS起動前はこのスプラッシュが本文を隠すので、見た目は従来どおり暗転→オープニング -->
+    <div id="__splash" style="position:fixed;inset:0;background:#04060f;z-index:50"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
